@@ -3,7 +3,7 @@
 if [ $# -ne 3 ]
 then
 	echo "Number of params should be 3">&2
-	echo "Command format: min size, max size, directory"
+	echo "Command format: min size, max size, directory">$2
 	exit 1
 fi
 
@@ -29,20 +29,17 @@ fi
 
 if [ "$1" -ge "$2" ]
 then
-	echo "First param should be less than second">&2
+	echo "First argument should be less than second">&2
 	exit 1
 fi
 
-# generating array of files
-files=$(find $3 -maxdepth 1 -type f -size +$1c -size -$2c)
+find $3 -maxdepth 1 -type f -size +$1c -size -$2c -printf '%s %p\n' | sort -n
 
-# creating empty file
-> tmpFile.txt
-for file in $files
-do
-	echo $(wc -c $file) >> tmpFile.txt
-done
 
-# sorting file
-sort -n tmpFile.txt
-rm tmpFile.txt
+
+
+
+
+
+
+
