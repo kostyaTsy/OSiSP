@@ -6,16 +6,16 @@ then
 	exit 1
 fi
 
-if [ -f "$1" ]
+if [ ! -f "$1" ]
 then
 	echo "File error" >&2
-	#exit 1
+	exit 1
 fi
 
-if [ -d "$2" ]
+if [ ! -d "$2" ]
 then
 	echo "Incorrect data" >&2
-	#exit 1
+	exit 1
 fi
 
 
