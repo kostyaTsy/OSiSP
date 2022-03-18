@@ -2,8 +2,9 @@
 
 if [ $# -ne 3 ]
 then
-	echo "Number of params should be 3">&2
-	echo "Command format: min size, max size, directory">$2
+	{ echo "Number of params should be 3"; 
+	echo "Command format: min size, max size, directory"; }>&2
+	
 	exit 1
 fi
 

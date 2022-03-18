@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
 
 int lineSize = 500;
 
@@ -23,28 +25,37 @@ int getFileStr(FILE *file, char *str) {
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
-        perror("First argument - should be a file,\nSecond argument should be a number (amount of output row per tap, 0 - is a plain text)");
-        return 0;
+        fprintf(stderr ,"First argument - should be a file\nSecond argument should be a number (amount of output row per tap, 0 - is a plain text)");
+        return -1;
     }
 
     char *ptr;
     long inNum = strtol(argv[2], &ptr, 10);
-    if (inNum < 0) {
-        perror("Second argument less than 0");
-        return 0;
+    if (inNum == LONG_MAX || inNum == LONG_MIN) {
+        perror("Big number");
+        return -1;
     }
-    if (strcmp(argv[2], ptr) == 0 || strlen(ptr) != 0) {
-        perror("Not a number");
-        return 0;
+    else if (inNum < 0) {
+        fprintf(stderr, "Number less than 0");
+        return -1;
+    }
+    else if (strcmp(argv[2], ptr) == 0 || strlen(ptr) != 0) {
+        fprintf(stderr, "Error input: Not a number");
+        return -1;
     }
 
     int fileHandler = open(argv[1], O_RDONLY);
     if (fileHandler < 0) {
         perror("Couldn't open the file");
-        return 0;
+        return -1;
     }
 
+    errno = 0;
     FILE *file = fdopen(fileHandler, "r");
+    if (errno != 0) {
+        perror("Couldn't open the file");
+        return -1;
+    }
 
     int cntLine = 0;
     char *str = (char*) calloc(lineSize, sizeof(char));
@@ -60,7 +71,7 @@ int main(int argc, char *argv[]) {
 
     if (fclose(file) != 0) {
         perror("Couldn't close the file");
-        return 0;
+        return -1;
     }
     return 0;
 }
