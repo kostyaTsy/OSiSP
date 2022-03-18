@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <errno.h>
 
 // lab var 5
 
@@ -35,14 +35,15 @@ long long GoThroughFiles(char dirName[1000], int *cntOfFiles, FILE *file) {
 
     long currMaxSize = 0;
     while ((dp = readdir(currDir)) != NULL) {
-        // Checking for directory
+        // checking for directory
         if (dp->d_type == DT_DIR && strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) {
+            //printf("%s:     %d\n", dirName, cntOfFiles);
             strcpy(dirDown, dirName);
             strcat(dirDown, "/");
             strcat(dirDown, dp->d_name);
             sizeOfDir += GoThroughFiles(dirDown, cntOfFiles, file);
         }
-        // Checking for simple files
+        // checking for simple files
         else if (strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0) {
             // Get full path to file
             cntFilesInDir++;
@@ -79,8 +80,8 @@ long long GoThroughFiles(char dirName[1000], int *cntOfFiles, FILE *file) {
 
 int main(int argc, char *argv[]) {
     if (argc != 3) {
-        perror("First argument - name of directory\nSecond argument - output file");
-        return 0;
+        fprintf(stderr ,"First argument - name of directory\nSecond argument - output file");
+        return -1;
     }
 
     char fileName[100] = "out.txt";
@@ -90,11 +91,19 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    // Open file to write output
+    // open file to write output
+    errno = 0;
     FILE *file = fdopen(fileHandler, "w");
+    if (errno != 0) {
+        perror("Couldn't open the out file");
+        return -1;
+    }
 
     int cnt = 0;
+    //char dirPath[1000] = "/home/parallels/Desktop/051004Tsyvilko/lab2/ex3/cmake-build-debug";
+    //char dirPath[1000] = "/home/parallels/Desktop/051004Tsyvilko/lab1";
+    //long long size = GoThroughFiles(dirPath, &cnt, file);
     long long size = GoThroughFiles(argv[1], &cnt, file);
-    printf("Size: %lld,\nAmount of files: %d\n", size, cnt);
+    printf("Size: %lld\nAmount of files: %d\n", size, cnt);
     return 0;
 }
