@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 
 void GetCurrTime() {
@@ -44,4 +45,13 @@ int main() {
         }
     }
     system("ps -x");
+
+    while (1) {
+        if (wait(NULL) == -1) {
+            if (errno == ECHILD)
+                break;
+        }
+    }
+
+    return 0;
 }
