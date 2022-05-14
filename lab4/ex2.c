@@ -11,7 +11,6 @@
 
 #define CHILD_COUNT 2
 
-int pids[CHILD_COUNT];
 int childInd = 1;
 int msgNumber;
 
@@ -37,7 +36,7 @@ void getInfo(int ind, char *person, int sigInd, int childPid) {
     printf("%3d PID:%5d PPID:%5d ", msgNumber, getpid(), getppid());
     msgNumber++;
     getCurrTime();
-    if (strcmp(person, "child")) {
+    if (strcmp(person, "child") == 0) {
         printf(" CHILD%d get SIGUSR%d\n", ind, sigInd);
     }
     else {
@@ -45,18 +44,8 @@ void getInfo(int ind, char *person, int sigInd, int childPid) {
     }
 }
 
-int getChildInd(pid_t pid) {
-    for (int i = 0; i < CHILD_COUNT; i++) {
-        if (pids[i] == pid) {
-            return i;
-        }
-    }
-    return -1;
-}
-
 void parentSigAct(int sig, siginfo_t *sginf, void *_) {
-    int chInd = getChildInd(sginf->si_pid);
-    getInfo(chInd, "child", 2, sginf->si_pid);
+    getInfo(0, "parent", 2, sginf->si_pid);
 
     struct timespec ts;
     ts.tv_sec = 0;
@@ -74,7 +63,7 @@ void parentSigAct(int sig, siginfo_t *sginf, void *_) {
 }
 
 void childSigAct(int sig) {
-    getInfo(childInd, "parent", 1, 0);
+    getInfo(childInd, "child", 1, 0);
     kill(getppid(), SIGUSR2);
 }
 
@@ -103,7 +92,6 @@ int main() {
                 perror("fork");
                 exit(-1);
             default:
-                pids[i] = pid;
                 childInd++;
                 break;
         }
